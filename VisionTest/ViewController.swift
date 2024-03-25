@@ -62,11 +62,21 @@ func detectFaces(in image: UIImage, completion: @escaping (Int) -> Void) {
 
 import UIKit
 import Vision
+// 给detectFacesAndShowAlertIfNone 这个方法增加日志 记录执行时间
+func showAlert(withMessage message: String, viewController: UIViewController) {
+    let alert = UIAlertController(title: "提示", message: message, preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "好的", style: .default))
+    viewController.present(alert, animated: true)
+}
 
 func detectFacesAndShowAlertIfNone(in image: UIImage, viewController: UIViewController, completion: @escaping (Int) -> Void) {
+    let startTime = Date() // 记录开始时间
+
     DispatchQueue.global(qos: .userInitiated).async {
         guard let cgImage = image.cgImage else {
             DispatchQueue.main.async {
+                let endTime = Date().timeIntervalSince(startTime) // 计算执行时间
+                print("人脸检测总耗时：\(endTime)秒")
                 completion(-1)
                 // showAlert(in: viewController, withMessage: "无法处理图像")
             }
@@ -76,6 +86,8 @@ func detectFacesAndShowAlertIfNone(in image: UIImage, viewController: UIViewCont
         let request = VNDetectFaceRectanglesRequest { (request, error) in
             guard error == nil else {
                 DispatchQueue.main.async {
+                    let endTime = Date().timeIntervalSince(startTime) // 计算执行时间
+                    print("人脸检测总耗时：\(endTime)秒")
                     completion(-1)
                     showAlert(in: viewController, withMessage: "人脸检测出错: \(error!.localizedDescription)")
                 }
@@ -84,6 +96,8 @@ func detectFacesAndShowAlertIfNone(in image: UIImage, viewController: UIViewCont
             
             let faceCount = request.results?.count ?? 0
             DispatchQueue.main.async {
+                let endTime = Date().timeIntervalSince(startTime) // 计算执行时间
+                print("人脸检测总耗时：\(endTime)秒")
                 completion(faceCount)
             }
 //            if faceCount == 0 {
@@ -98,6 +112,8 @@ func detectFacesAndShowAlertIfNone(in image: UIImage, viewController: UIViewCont
             try handler.perform([request])
         } catch {
             DispatchQueue.main.async {
+                let endTime = Date().timeIntervalSince(startTime) // 计算执行时间
+                print("人脸检测总耗时：\(endTime)秒")
                 completion(-1)
                 // showAlert(in: viewController, withMessage: "执行人脸检测失败: \(error)")
             }
